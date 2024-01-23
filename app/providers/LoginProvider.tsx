@@ -9,6 +9,7 @@ import {FaGithub} from "react-icons/fa"
 import { signIn } from 'next-auth/react';
 import useLoginModal from '../hooks/useLoginModal';
 import axios from "axios";
+import { useToast } from '@/components/ui/use-toast';
 
 
 const LoginProvider = () => {
@@ -16,6 +17,8 @@ const LoginProvider = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [varient, setVarient] = useState("login");
+
+    const {toast} = useToast();
 
     const loginModal = useLoginModal();
 
@@ -48,6 +51,28 @@ const LoginProvider = () => {
         
         loginModal.onClose();
     },[email, name, password, loginModal, login]);
+
+    const socialAction = (action:string) => {
+
+        signIn(action, {redirect:false})
+        .then((callback) => {
+            if(callback?.error){
+                toast({
+                    variant:"destructive",
+                    title:"Invalide credentials!"
+                })
+            }
+
+            if(callback?.ok && !callback?.error){
+                toast({
+                    variant:"default",
+                    title:"Logged In!"
+                })
+            }
+        })
+        .finally(() => loginModal.onClose());
+
+     }
 
 
   return (
@@ -121,15 +146,19 @@ const LoginProvider = () => {
                 gap-3
                 mt-3
             '>
-                <div className='
+                {/* <div 
+                onClick={() => socialAction("google")}
+                className='
                     bg-white
                     p-2
                     rounded-full
                 '>
                     <FcGoogle className='h-7 w-7' />
-                </div>
+                </div> */}
 
-                <div className='
+                <div 
+                    onClick={() => socialAction("github")}
+                className='
                     bg-white
                     p-2
                     rounded-full
