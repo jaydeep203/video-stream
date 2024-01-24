@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from '@/components/ui/button';
-import { ChevronRight, PlayCircle } from 'lucide-react';
+import { ChevronRight, PlayCircle, PlusCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react';
 import { Movie, User } from '@prisma/client';
@@ -11,6 +11,8 @@ import Image from 'next/image';
 import StarBadge from '@/app/components/StarBadge';
 import { useRouter } from 'next/navigation';
 import FavoriteButton from '@/app/components/FavoriteButton';
+import useLoginModal from '@/app/hooks/useLoginModal';
+import { useToast } from '@/components/ui/use-toast';
 
 interface myListProps{
     favorites: Movie[];
@@ -23,6 +25,8 @@ const MyList:React.FC<myListProps> = ({
 }) => {
     const session = useSession();
     const [visible, setVisible] = useState<boolean>(false);
+    const loginModal = useLoginModal();
+    const {toast} = useToast();
 
     const router = useRouter();
 
@@ -32,9 +36,23 @@ const MyList:React.FC<myListProps> = ({
         }
     },[session?.status, setVisible]);
 
-    if(!visible || isEmpty(favorites)){
+
+    if(!visible){
         return null;
     }
+
+    const handlePlay = (id:string) => {
+        if(session?.status=="unauthenticated"){
+            loginModal.onOpen();
+            toast({
+                title: "login to watch the movie!"
+            })
+        }
+        else{
+            router.push(`/watch/${id}`);
+        }
+    }
+
 
 
   return (
@@ -69,10 +87,30 @@ const MyList:React.FC<myListProps> = ({
                 </Button>
                 
             </div>
-
-            <div 
-                    className='w-full max-w-[95%] mx-auto flex flex-col sm:flex-row gap-3 sm:overflow-x-scroll no-scrollbar'
-                >
+            {
+                 isEmpty(favorites)? (
+                    <div className='
+                        w-full
+                        h-[20vh]
+                        text-white
+                        flex
+                        flex-row
+                        gap-1
+                    '>
+                        Click on <PlusCircle /> to add into the list.
+                    </div>
+                 ) : (
+                    <div 
+                        className='w-full 
+                            max-w-[95%] 
+                            mx-auto 
+                            flex 
+                            flex-col 
+                            sm:flex-row 
+                            gap-3 
+                            sm:overflow-x-scroll 
+                            no-scrollbar'
+                    >
                     {
                         favorites?.map(({title, thumbnailUrl, id, duration, genre},index)=>(
                             <div key={index} className='md:basis-1/5 lg:basis-1/5 mr-2'>
@@ -88,7 +126,7 @@ const MyList:React.FC<myListProps> = ({
                                     "
                                     >
                                             <div className="relative aspect-square w-full mx-auto cursor-pointer"
-                                            onClick={() => router.push(`/watch/${id}`)}
+                                            onClick={() => handlePlay(id)}
                                             >
                                             <Image 
                                                 src={thumbnailUrl}
@@ -153,8 +191,12 @@ const MyList:React.FC<myListProps> = ({
                                 </div>
                             </div>
                         ))
-                    }
-            </div>
+                        }
+                    </div>
+                 )
+            }
+
+            
 
         </div>
     </div>

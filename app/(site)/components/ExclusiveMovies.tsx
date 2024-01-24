@@ -1,10 +1,13 @@
 "use client";
 import FavoriteButton from '@/app/components/FavoriteButton';
 import StarBadge from '@/app/components/StarBadge';
+import useLoginModal from '@/app/hooks/useLoginModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/components/ui/use-toast';
 import { Movie, User } from '@prisma/client';
 import { ChevronRight, PlayCircle } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import React from 'react'
@@ -20,6 +23,22 @@ const ExclusiveMovies:React.FC<exclusiveMoviesProps> = ({
     currentUser
 }) => {
     const router = useRouter();
+    const session = useSession();
+    const loginModal = useLoginModal();
+    const {toast} = useToast();
+
+    const handlePlay = (id:string) => {
+        if(session?.status=="unauthenticated"){
+            loginModal.onOpen();
+            toast({
+                title: "login to watch the movie!"
+            })
+        }
+        else{
+            router.push(`/watch/${id}`);
+        }
+    }
+
   return (
     <div className='
         w-full
@@ -70,7 +89,7 @@ const ExclusiveMovies:React.FC<exclusiveMoviesProps> = ({
                                     "
                                     >
                                             <div className="relative aspect-square w-full mx-auto cursor-pointer"
-                                            onClick={() => router.push(`/watch/${id}`)}
+                                            onClick={() => handlePlay(id)}
                                             >
                                             <Image 
                                                 src={thumbnailUrl}

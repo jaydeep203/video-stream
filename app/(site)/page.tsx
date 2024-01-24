@@ -10,6 +10,8 @@ import MyList from './components/MyList';
 import { getFavorites } from '../actions/getFavorites';
 import getCurrentUser from '../actions/getCurrentUser';
 
+export const revalidate = 0;
+
 const page = async() => {
   const movie = await getMovieBanner();
   const movies = await getAllMovies();

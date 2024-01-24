@@ -3,6 +3,9 @@
 import React from 'react';
 import {PlayCircle} from "lucide-react";
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import useLoginModal from '../hooks/useLoginModal';
+import { useToast } from '@/components/ui/use-toast';
 
 interface playButtonProps{
     movieId: string | undefined;
@@ -13,10 +16,32 @@ const PlayButton:React.FC<playButtonProps> = ({
 }) => {
 
     const router = useRouter();
+    const session = useSession();
+    const loginModal = useLoginModal();
+    const {toast} = useToast();
+
+    const handlePlay = (id:string) => {
+        if(session?.status=="unauthenticated"){
+            loginModal.onOpen();
+            toast({
+                title: "login to watch the movie!"
+            })
+        }
+        else{
+            if(id==""){
+                toast({
+                    title:"Unable to play!"
+                })
+            }
+            else{
+                router.push(`/watch/${id}`);
+            }
+        }
+    }
 
   return (
     <button 
-        onClick={() => router.push(`/watch/${movieId}`)}
+        onClick={() => handlePlay(movieId || "")}
     className='
         bg-gradient-to-tr
         from-pink-600

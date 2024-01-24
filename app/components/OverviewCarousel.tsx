@@ -16,6 +16,9 @@ import StarBadge from "./StarBadge";
 import {Clock, VenetianMask, PlayCircle, Share2, MessageSquareText} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import useLoginModal from "../hooks/useLoginModal";
+import { useToast } from "@/components/ui/use-toast";
 
 interface CarouselProps{
     movies: Movie[]
@@ -23,6 +26,21 @@ interface CarouselProps{
 
 export function OverviewCarousel({movies}:CarouselProps) {
     const router = useRouter();
+    const session = useSession();
+    const loginModal = useLoginModal();
+    const {toast} = useToast();
+
+    const handlePlay = (id:string) => {
+        if(session?.status=="unauthenticated"){
+            loginModal.onOpen();
+            toast({
+                title: "login to watch the movie!"
+            })
+        }
+        else{
+            router.push(`/watch/${id}`);
+        }
+    }
   return (
     <Carousel 
         opts={{
@@ -114,7 +132,7 @@ export function OverviewCarousel({movies}:CarouselProps) {
                             flex flex-row gap-5 items-center
                         ">
                             <Button 
-                            onClick={() => router.push(`/watch/${id}`)}
+                            onClick={() => handlePlay(id)}
                             size="lg"
                             className="
                                 bg-gradient-to-tr
