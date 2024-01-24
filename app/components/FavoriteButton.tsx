@@ -71,7 +71,7 @@ const FavoriteButton:React.FC<FavoriteButtonProps> = ({
 
         
 
-    },[movieId, toast, isFavorite, loginModal, session]);
+    },[movieId, toast, isFavorite, loginModal, session, router]);
 
     const Icon = isFavorite ? Check : Plus;
   return (
